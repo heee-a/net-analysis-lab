@@ -6,8 +6,11 @@ __pycache__/
 venv/
 
 # Generated artefacts -- the pipeline recreates them from scratch on every run.
+# Only the root-level scratch directory is ignored; docs/charts/ is the copy that
+# GitHub Pages (and the README) actually serves, so it must stay tracked.
+/charts/
 data/raw/ping_2*.csv
-charts/
+!docs/charts/
 !data/processed/.gitkeep
 !data/raw/.gitkeep
 

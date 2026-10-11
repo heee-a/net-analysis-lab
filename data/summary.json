@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-10T12:51:28+00:00",
+  "generated_utc": "2026-10-11T06:20:04+00:00",
   "probes_total": 360,
   "targets": 6,
   "measurement": {
@@ -14,7 +14,7 @@
     "max_cross_diff": 0.0,
     "aloha_rel_err_pct": 0.019164167401324313,
     "max_audit_residual": 0.00012222222222222221,
-    "collision_pct_N2": 0.09351267548228673,
+    "collision_pct_N2": 0.09351267548228671,
     "collision_pct_Nmax": 9.72195914401967
   }
 }

@@ -35,6 +35,17 @@ CHARTS = os.path.join(_ROOT, "charts")
 RAW = os.path.join(DATA, "raw")
 PROCESSED = os.path.join(DATA, "processed")
 
+# matplotlib renamed the boxplot keyword arguments in 3.9/3.10 and dropped the
+# old names in 3.11. Support both so the pipeline runs on matplotlib>=3.4.
+_MPL = tuple(int(p) for p in matplotlib.__version__.split(".")[:2] if p.isdigit())
+
+
+def boxplot_horizontal(ax, data):
+    if _MPL >= (3, 9):
+        return ax.boxplot(data, orientation="horizontal", patch_artist=True,
+                          widths=0.62)
+    return ax.boxplot(data, vert=False, patch_artist=True, widths=0.62)
+
 plt.rcParams.update({
     "figure.dpi": 130,
     "savefig.dpi": 130,
@@ -181,8 +192,9 @@ def stage_charts(df: pd.DataFrame, metrics: pd.DataFrame, sim_df: pd.DataFrame,
     labels = [lb for lb, _ in df.groupby("label")]
     order_idx = sorted(range(len(labels)), key=lambda i: order.index(labels[i]))
     boxdata = [data[i] for i in order_idx]
-    bp = ax2.boxplot(boxdata, labels=[labels[i] for i in order_idx],
-                     vert=False, patch_artist=True, widths=0.62)
+    bp = boxplot_horizontal(ax2, boxdata)
+    ax2.set_yticks(range(1, len(boxdata) + 1))
+    ax2.set_yticklabels([labels[i] for i in order_idx], fontsize=8)
     for patch, lab in zip(bp["boxes"], [labels[i] for i in order_idx]):
         tier = metrics.loc[metrics["label"] == lab, "tier"].iloc[0]
         patch.set_facecolor(TIER_COLORS.get(tier, "#999"))
