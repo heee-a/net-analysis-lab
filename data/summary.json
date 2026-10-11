@@ -1,0 +1,20 @@
+{
+  "generated_utc": "2026-10-10T12:51:28+00:00",
+  "probes_total": 360,
+  "targets": 6,
+  "measurement": {
+    "fastest_median_ms": 11.0,
+    "slowest_median_ms": 239.0,
+    "worst_loss_pct": 45.0,
+    "targets_with_loss": 2,
+    "reject_normality": 6
+  },
+  "quality_gate_rows": 6,
+  "simulation": {
+    "max_cross_diff": 0.0,
+    "aloha_rel_err_pct": 0.019164167401324313,
+    "max_audit_residual": 0.00012222222222222221,
+    "collision_pct_N2": 0.09351267548228673,
+    "collision_pct_Nmax": 9.72195914401967
+  }
+}

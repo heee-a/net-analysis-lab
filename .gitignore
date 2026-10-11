@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Generated artefacts -- the pipeline recreates them from scratch on every run.
+data/raw/ping_2*.csv
+charts/
+!data/processed/.gitkeep
+!data/raw/.gitkeep
+
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

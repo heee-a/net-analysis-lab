@@ -1,0 +1,7 @@
+total,ok,missing,duplicate_seq,nonpositive,extreme,flags,passed,notes,loss_pct,label,tier
+60,59,1,0,0,0,{'missing': 1},True,['1 timeout(s) retained as missing data'],1.6667,AliDNS,dns-anycast
+60,60,0,0,0,0,{},True,[],0.0,Baidu,national-web
+60,33,27,0,0,0,{'missing': 27},True,['27 timeout(s) retained as missing data'],45.0,Cloudflare DNS,dns-anycast
+60,60,0,0,0,0,{},True,[],0.0,GitHub,overseas-web
+60,60,0,0,0,0,{},True,[],0.0,Google DNS,dns-anycast
+60,60,0,0,0,0,{},True,[],0.0,QQ,national-web
