@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-11T06:20:04+00:00",
+  "generated_utc": "2026-10-11T06:42:32+00:00",
   "probes_total": 360,
   "targets": 6,
   "measurement": {
@@ -7,7 +7,14 @@
     "slowest_median_ms": 239.0,
     "worst_loss_pct": 45.0,
     "targets_with_loss": 2,
-    "reject_normality": 6
+    "reject_normality": 6,
+    "jitter_min_ms": 1.544,
+    "jitter_max_ms": 2.161,
+    "jitter_vs_latency": {
+      "pearson_r": 0.17827576827542466,
+      "spearman_r": 0.2,
+      "n": 6
+    }
   },
   "quality_gate_rows": 6,
   "simulation": {

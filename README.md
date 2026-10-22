@@ -7,7 +7,7 @@
 
 [![CI](https://github.com/heee-a/net-analysis-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/heee-a/net-analysis-lab/actions/workflows/ci.yml)
 [![Python 3.10–3.12](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue?logo=python&logoColor=white)](https://www.python.org)
-[![tests](https://img.shields.io/badge/tests-35%20passing-brightgreen)](tests/)
+[![tests](https://img.shields.io/badge/tests-40%20passing-brightgreen)](tests/)
 [![GitHub Pages](https://img.shields.io/badge/Pages-live-2ea44f?logo=github)](https://heee-a.github.io/net-analysis-lab/)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
@@ -52,6 +52,10 @@
 **② 抖动与时延几乎无关。**
 中位 RTT 从 11 ms 跨到 239 ms——**21 倍**的差距；而 RFC 3550 抖动只在 **1.54–2.16 ms** 之间——不到 **1.4 倍**。
 直觉上"慢的网络更抖"在这批数据里不成立：抖动主要由**本地最后一段链路的排队**决定，而不是端到端距离。这也是为什么用 ping 的抖动去预测 VoIP 质量，往往错得离谱。
+
+![抖动与时延](docs/charts/fig6_jitter_vs_latency.png)
+
+> 顺带给出 Pearson r = **0.18**、Spearman ρ = **0.20**，但只有 **n = 6** 个点，远不足以支撑相关性检验。这两个数字只是形状描述，结论本身来自量级比较（21× vs 1.4×），而不是相关系数。
 
 **③ anycast 并不保证就近。**
 同为 anycast 的三个 DNS 中位时延分别是 11 ms / 46 ms / 81 ms，差 7 倍。anycast 只承诺路由可达最优 POP，不承诺对你所在的接入网最优。
@@ -132,6 +136,7 @@ N 从 2 增到 48：
 | 单一主机、单一接入网 | 结论不能外推到别的网络 | 复现命令开放，换机可交叉验证 |
 | Windows `ping` 为毫秒分辨率 | 亚毫秒差异不可见 | `time<1ms` 统一记录为 1 ms，质量门禁打标 |
 | 饱和负载 + 永久排队 | 放大 BEB 捕获效应、低估公平性 | 已在文中显式打折说明 |
+| 抖动–时延相关系数只有 6 个点 | 不足以做显著性检验 | 仅作形状描述；结论来自量级比较而非相关系数 |
 
 ---
 
@@ -139,7 +144,7 @@ N 从 2 增到 48：
 
 ```bash
 pip install -r requirements.txt
-pytest                                    # 35 个测试
+pytest                                    # 40 个测试
 python scripts/run_pipeline.py --count 60 # 采集 + 分析 + 出图
 python scripts/run_pipeline.py --reuse    # 不发新包，重算已有样本
 python scripts/build_site.py              # 从 data/ 重新生成 Pages 页面
@@ -158,7 +163,7 @@ net-analysis-lab/
 │   ├── run_pipeline.py   端到端流水线
 │   ├── build_site.py     data/ → 静态站
 │   └── publish.py        推送 GitHub + 启用 Pages（需 token）
-├── tests/               35 个测试
+├── tests/               40 个测试（含 5 项针对生成页面的守卫）
 ├── data/raw|processed/   原始样本与派生指标
 ├── charts/               fig1 – fig5（本地生成物，不入版本库）
 └── docs/                 GitHub Pages 站点（自动生成，含 charts/ 副本）
@@ -174,6 +179,13 @@ net-analysis-lab/
 | **net-analysis-lab**（本仓库） | **网络的一手测量 + 协议层建模，配完整不确定度与自证机制** |
 | [dataforge](https://github.com/heee-a/dataforge) | ETL 管道：增量采集 → 星型数仓 → 质量门禁 |
 | [ml-bench](https://github.com/heee-a/ml-bench) | 多模型基准 + 显著性检验 + A/B 方法论 |
+
+---
+
+## 版本与引用
+
+- 版本历史：[CHANGELOG.md](CHANGELOG.md)
+- 引用格式：[CITATION.cff](CITATION.cff)（GitHub 会据此在仓库页提供 *Cite this repository*）
 
 ---
 

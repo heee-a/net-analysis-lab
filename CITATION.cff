@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+title: net-analysis-lab
+message: >-
+  If you use this software, please cite it using the metadata from this file.
+type: software
+abstract: >-
+  Reproducible measurement and analysis of network latency, plus a verifiable
+  model of a shared-medium Ethernet. ICMP samples are collected with the OS ping
+  binary, passed through a non-destructive quality gate, and summarised with
+  Wilson and bootstrap intervals. The CSMA/CD model is checked three ways: two
+  independent implementations must agree bit-for-bit, a degenerate configuration
+  must match the exact slotted-ALOHA theory, and every slot must reconcile in an
+  idle/success/collision audit. Every headline number on the project site is
+  regenerated from data/ by scripts in this repository.
+authors:
+  - alias: heee-a
+    website: 'https://github.com/heee-a'
+license: MIT
+version: 0.1.0
+date-released: '2026-10-22'
+repository-code: 'https://github.com/heee-a/net-analysis-lab'
+url: 'https://heee-a.github.io/net-analysis-lab/'
+keywords:
+  - network-measurement
+  - latency
+  - jitter
+  - packet-loss
+  - icmp
+  - data-quality
+  - wilson-interval
+  - bootstrap
+  - csma-cd
+  - ethernet
+  - reproducible-research
+programming-language: Python 3

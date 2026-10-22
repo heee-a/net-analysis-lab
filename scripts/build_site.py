@@ -14,9 +14,11 @@ from __future__ import annotations
 import html
 import json
 import os
+import re
 import shutil
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pandas as pd
 
@@ -137,7 +139,16 @@ PAGE = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>net-analysis-lab · 网络延迟实测与共享介质建模</title>
 <meta name="description" content="ICMP 实测 → 质量门禁 → 统计推断 → CSMA/CD 共享介质建模。每个数字都由仓库脚本产出，并附带不确定度。">
+<meta name="author" content="heee-a">
 <link rel="canonical" href="https://heee-a.github.io/net-analysis-lab/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1117'/%3E%3Cpath d='M5 21 L11 11 L17 17 L27 7' stroke='%2358a6ff' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="net-analysis-lab · 网络延迟实测与共享介质建模">
+<meta property="og:description" content="{probes} 个 ICMP 样本、6 个目标，每个数字都带不确定度；CSMA/CD 模型经双实现交叉验证、理论对照与时隙守恒三重校验。">
+<meta property="og:url" content="https://heee-a.github.io/net-analysis-lab/">
+<meta property="og:image" content="https://heee-a.github.io/net-analysis-lab/charts/fig6_jitter_vs_latency.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0d1117">
 <style>
   :root {{
     --bg:#ffffff; --fg:#1b1f23; --mut:#6a737d; --line:#e1e4e8;
@@ -302,11 +313,11 @@ PAGE = """<!DOCTYPE html>
 而不是“没问题”。报点估计而不报区间，是这类作业最常见的错误。</div>
 
 <h2 id="trace"><span class="n">2 ·</span> 逐探针轨迹</h2>
-<figure><img src="charts/fig1_rtt_trace.png" alt="每个探针的往返时延">
+<figure><a href="charts/fig1_rtt_trace.png"><img src="charts/fig1_rtt_trace.png" alt="每个探针的往返时延"></a>
 <figcaption>图 1：每个探针的往返时延。纵向灰线是超时（缺失）样本。锯齿与尖峰来自排队与路由变化，而非采集误差。</figcaption></figure>
 
 <h2 id="dist"><span class="n">3 ·</span> 延迟呈现出明显的右偏</h2>
-<figure><img src="charts/fig2_distribution.png" alt="延迟密度与箱线图">
+<figure><a href="charts/fig2_distribution.png"><img src="charts/fig2_distribution.png" alt="延迟密度与箱线图"></a>
 <figcaption>图 2：延迟密度与箱线图。长尾意味着均值会被少数抖动样本拉高，
 因此本报告一律以<b>中位数</b>作为主统计量，并用 Bootstrap 给出区间。</figcaption></figure>
 <div class="note warn">{nt} 个目标中有 {reject} 个在 Shapiro–Wilk 检验下拒绝正态假设
@@ -314,11 +325,18 @@ PAGE = """<!DOCTYPE html>
 是对这类数据的常见误用。</div>
 
 <h2 id="loss"><span class="n">4 ·</span> 丢包与抖动</h2>
-<figure><img src="charts/fig3_loss_jitter.png" alt="丢包率与抖动">
+<figure><a href="charts/fig3_loss_jitter.png"><img src="charts/fig3_loss_jitter.png" alt="丢包率与抖动" loading="lazy"></a>
 <figcaption>图 3：丢包率使用 Wilson 置信区间。样本量只有几十的时候区间宽得惊人 ——
 只报一个点估计是误导性的。</figcaption></figure>
 <p>抖动按 RFC 3550 的平均到达间隔抖动计算，<b>不等于</b>时延的标准差。
 真正破坏语音/视频体验的是相邻包的相对抖动，而不是整体离散程度。</p>
+<figure><a href="charts/fig6_jitter_vs_latency.png"><img src="charts/fig6_jitter_vs_latency.png" alt="抖动与时延的对比" loading="lazy"></a>
+<figcaption>图 6：中位时延跨越两个数量级，抖动却几乎不动。灰色横带覆盖抖动的实际范围
+（{jit_min:.2f}–{jit_max:.2f} ms），用来和时延的跨度做目视对比。</figcaption></figure>
+<div class="note">时延有 <b>{med_ratio:.0f} 倍</b>的差距，抖动只有 <b>{jit_ratio:.1f} 倍</b> ——
+两者几乎无关。这里也给出 Pearson r = {pearson}、Spearman ρ = {spearman}，
+但 <b>n = {corr_n} 个点远不足以支撑相关性检验</b>；它们只是形状描述，
+结论本身来自量级比较，而不是相关系数。</div>
 
 <h2 id="collision"><span class="n">5 ·</span> 为什么不隔离碰撞域会崩</h2>
 <p>实测告诉我们网络“现在”如何表现；仿真告诉我们共享介质“为什么”会在主机变多时崩塌。
@@ -335,7 +353,7 @@ PAGE = """<!DOCTYPE html>
   </tbody>
 </table>
 </div>
-<figure><img src="charts/fig4_collision_domain.png" alt="碰撞域规模的影响">
+<figure><a href="charts/fig4_collision_domain.png"><img src="charts/fig4_collision_domain.png" alt="碰撞域规模的影响" loading="lazy"></a>
 <figcaption>图 4：碰撞域规模对碰撞率、单主机带宽与时延的影响。</figcaption></figure>
 <div class="note">总吞吐几乎不变（{util_first:.1f}% → {util_last:.1f}%），
 因为这是一个“永远有数据要发”的饱和模型。这说明问题不在“带宽不够”，
@@ -346,7 +364,7 @@ PAGE = """<!DOCTYPE html>
 这张表应读作“IEEE 802.3 CSMA/CD 在饱和负载下的行为”，<b>而不是真实局域网的性能预测</b>。</div>
 
 <h2 id="trust"><span class="n">6 ·</span> 凭什么相信这些数字</h2>
-<figure><img src="charts/fig5_validation.png" alt="有效性验证">
+<figure><a href="charts/fig5_validation.png"><img src="charts/fig5_validation.png" alt="有效性验证" loading="lazy"></a>
 <figcaption>图 5：两条独立实现的逐位一致性，以及把模型退化成时隙 ALOHA 后与精确二项分布理论的对照。</figcaption></figure>
 <ul>
   <li><b>双实现交叉验证 —— 偏差 {crossmax:.1e}</b>。同一个 CSMA/CD 模型写了事件驱动（堆）与逐时隙两版，
@@ -419,6 +437,15 @@ python scripts/build_site.py              # 从 data/ 重新生成本页面</cod
 """
 
 
+def count_tests() -> int:
+    """Count test functions so the page can never advertise a stale number."""
+    total = 0
+    for path in sorted(Path(ROOT, "tests").glob("test_*.py")):
+        total += len(re.findall(r"^def test_", path.read_text(encoding="utf-8"),
+                                flags=re.MULTILINE))
+    return total
+
+
 def main() -> None:
     metrics, sweep, quality, summary = load()
     sim = summary.get("simulation") or {}
@@ -446,6 +473,8 @@ def main() -> None:
     zero_bound = float(metrics.loc[metrics["loss_pct"] == 0, "loss_ci_hi"].max()) \
         if (metrics["loss_pct"] == 0).any() else 0.0
 
+    jvl = m.get("jitter_vs_latency") or {}
+
     page = PAGE.format(
         repo=REPO_URL,
         probes=summary["probes_total"], targets=summary["targets"],
@@ -461,6 +490,9 @@ def main() -> None:
         jit_min=float(jit.min()) if len(jit) else 0.0,
         jit_max=float(jit.max()) if len(jit) else 0.0,
         jit_ratio=(float(jit.max()) / max(float(jit.min()), 1e-9)) if len(jit) else 1.0,
+        pearson=f'{jvl["pearson_r"]:.2f}' if jvl else "n/a",
+        spearman=f'{jvl["spearman_r"]:.2f}' if jvl else "n/a",
+        corr_n=jvl.get("n", 0) if jvl else 0,
         anycast_list=anycast_list, anycast_ratio=anycast_ratio,
         metrics=metrics_rows(metrics), sweep=sweep_rows(sweep),
         util_first=float(sweep["util_pct"].iloc[0]),
@@ -473,7 +505,7 @@ def main() -> None:
         qhead=quality_rows(quality).split("\n")[0].strip(),
         qbody="\n".join(quality_rows(quality).split("\n")[1:]),
         aloha_err=float(sim.get("aloha_rel_err_pct", 0.0)),
-        ntests="35",
+        ntests=count_tests(),
     )
     path = os.path.join(DOCS, "index.html")
     with open(path, "w", encoding="utf-8") as fh:

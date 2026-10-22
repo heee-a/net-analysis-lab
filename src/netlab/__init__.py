@@ -10,5 +10,5 @@ Every headline number produced by this package is derived from data captured at
 run time and ships with an uncertainty interval.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __all__ = ["collect", "quality", "sim"]

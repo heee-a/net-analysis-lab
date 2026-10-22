@@ -297,10 +297,31 @@ def stage_charts(df: pd.DataFrame, metrics: pd.DataFrame, sim_df: pd.DataFrame,
     ax2.tick_params(axis="x", labelsize=7)
     ax2.set_title(f"(b) degenerate to slotted ALOHA: rel. err "
                   f"{aloha['rel_err_pct']:.3f}%")
+    # --- Fig 6: jitter vs latency -----------------------------------------
+    # The claim "jitter barely moves while latency spans 21x" deserves a picture.
+    # Six points cannot support a correlation test, so the panel only shows the
+    # shape: latency on a log axis, jitter on a linear axis with the range the
+    # eye should compare against.
+    sub = metrics.dropna(subset=["median_ms", "jitter_ms"])
+    fig, ax = plt.subplots(figsize=(7.6, 4.3))
+    ax.axhspan(sub["jitter_ms"].min(), sub["jitter_ms"].max(), color="#bbb",
+               alpha=0.22, zorder=0,
+               label=f'jitter spread {sub["jitter_ms"].max() / sub["jitter_ms"].min():.2f}×')
+    for _, r in sub.iterrows():
+        ax.scatter(r["median_ms"], r["jitter_ms"], s=90,
+                   color=TIER_COLORS.get(r["tier"], "#666"), zorder=3,
+                   edgecolor="#ffffff", linewidth=1.3)
+        ax.annotate(r["label"], (r["median_ms"], r["jitter_ms"]),
+                    textcoords="offset points", xytext=(9, 5), fontsize=8.5)
+    ax.set_xscale("log")
+    ax.set_xlabel("median round-trip time (ms, log scale)")
+    ax.set_ylabel("jitter (RFC 3550, ms)")
+    ax.set_title("Fig. 6  Latency spans two orders of magnitude; jitter does not")
+    ax.legend(fontsize=8, loc="lower right", framealpha=0.9)
     fig.tight_layout()
-    fig.savefig(os.path.join(CHARTS, "fig5_validation.png"))
+    fig.savefig(os.path.join(CHARTS, "fig6_jitter_vs_latency.png"))
     plt.close(fig)
-    print("      charts/fig1..fig5 已生成")
+    print("      charts/fig1..fig6 已生成")
 
 
 def main() -> None:
@@ -338,6 +359,16 @@ def main() -> None:
         stage_charts(df, metrics, sim_df, cross, aloha)
 
     # ---- headline summary for humans & the README -------------------------
+    # Jitter-vs-latency association. n is tiny (one point per target), so this is
+    # reported as a descriptive shape indicator, never as a significance test.
+    jl = metrics.dropna(subset=["median_ms", "jitter_ms"])
+    if len(jl) >= 3:
+        pearson = float(np.corrcoef(jl["median_ms"], jl["jitter_ms"])[0, 1])
+        ranks = jl[["median_ms", "jitter_ms"]].rank()
+        spearman = float(np.corrcoef(ranks["median_ms"], ranks["jitter_ms"])[0, 1])
+    else:
+        pearson = spearman = None
+
     summary = {
         "generated_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "probes_total": int(len(df)),
@@ -348,6 +379,12 @@ def main() -> None:
             "worst_loss_pct": float(metrics["loss_pct"].max()),
             "targets_with_loss": int((metrics["loss_pct"] > 0).sum()),
             "reject_normality": int(metrics["reject_normal"].fillna(False).sum()),
+            "jitter_min_ms": float(jl["jitter_ms"].min()) if len(jl) else None,
+            "jitter_max_ms": float(jl["jitter_ms"].max()) if len(jl) else None,
+            "jitter_vs_latency": (None if pearson is None else {
+                "pearson_r": pearson, "spearman_r": spearman,
+                "n": int(len(jl)),
+            }),
         },
         "quality_gate_rows": int(len(qdf)),
         "simulation": (None if args.skip_sim else {
