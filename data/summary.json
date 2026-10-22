@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-11T06:42:32+00:00",
+  "generated_utc": "2026-10-22T02:14:03+00:00",
   "probes_total": 360,
   "targets": 6,
   "measurement": {
@@ -22,6 +22,25 @@
     "aloha_rel_err_pct": 0.019164167401324313,
     "max_audit_residual": 0.00012222222222222221,
     "collision_pct_N2": 0.09351267548228671,
-    "collision_pct_Nmax": 9.72195914401967
+    "collision_pct_Nmax": 9.72195914401967,
+    "setup": {
+      "slot_bits": 512,
+      "frame_slots": 24,
+      "jam_slots": 1,
+      "slot_us": 51.199999999999996,
+      "warmup_slots": 20000,
+      "repeats": 8,
+      "slots": 200000,
+      "hosts": [
+        2,
+        4,
+        8,
+        12,
+        16,
+        24,
+        32,
+        48
+      ]
+    }
   }
 }

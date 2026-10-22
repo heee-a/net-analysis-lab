@@ -11,6 +11,7 @@ during that run. No number in the README is hand-written.
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
 import os
 import sys
@@ -29,6 +30,10 @@ import matplotlib.pyplot as plt                                 # noqa: E402
 from netlab import collect as collect_mod                       # noqa: E402
 from netlab import quality as qmod                              # noqa: E402
 from netlab import sim                                          # noqa: E402
+
+# Read the warm-up default off the model itself, so the report cannot quote a
+# number the simulation no longer uses.
+WARMUP_SLOTS = inspect.signature(sim.simulate_csma_cd).parameters["warmup"].default
 
 DATA = os.path.join(_ROOT, "data")
 CHARTS = os.path.join(_ROOT, "charts")
@@ -393,6 +398,18 @@ def main() -> None:
             "max_audit_residual": float(sim_df["audit_resid"].abs().max()),
             "collision_pct_N2": float(sim_df.loc[sim_df["N"] == 2, "collision_pct"].iloc[0]),
             "collision_pct_Nmax": float(sim_df["collision_pct"].iloc[-1]),
+            # Published alongside the results so the page never hard-codes a
+            # model parameter: change the defaults and the prose follows.
+            "setup": {
+                "slot_bits": sim.SLOT_BITS,
+                "frame_slots": sim.FRAME_SLOTS,
+                "jam_slots": sim.JAM_SLOTS,
+                "slot_us": sim.SLOT_BITS / 10e6 * 1e6,
+                "warmup_slots": WARMUP_SLOTS,
+                "repeats": args.repeats,
+                "slots": args.slots,
+                "hosts": [int(n) for n in sim_df["N"]],
+            },
         }),
     }
     with open(os.path.join(DATA, "summary.json"), "w", encoding="utf-8") as fh:

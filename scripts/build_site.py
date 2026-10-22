@@ -340,8 +340,9 @@ PAGE = """<!DOCTYPE html>
 
 <h2 id="collision"><span class="n">5 ·</span> 为什么不隔离碰撞域会崩</h2>
 <p>实测告诉我们网络“现在”如何表现；仿真告诉我们共享介质“为什么”会在主机变多时崩塌。
-模型跑的是标准 10 Mb/s 以太网时隙参数（1 时隙 = 512 bit = 51.2 μs，成帧后的数据帧占 24 时隙，
-冲突阻塞占 1 时隙），饱和负载，每个配置 {repeats} 个独立随机种子。</p>
+模型跑的是标准 10 Mb/s 以太网时隙参数（1 时隙 = {slot_bits} bit = {slot_us:.1f} μs，
+成帧后的数据帧占 {frame_slots} 时隙，冲突阻塞占 {jam_slots} 时隙），饱和负载，
+每个配置 {repeats} 个独立随机种子 × 每次 {slots:,} 个时隙。</p>
 <div class="scroll">
 <table>
   <thead><tr>
@@ -375,7 +376,7 @@ PAGE = """<!DOCTYPE html>
       把它当精确值做对照会把正确的程序判错 —— 两者都已画在图里。）</li>
   <li><b>时隙守恒 —— 残差 {resid:.1e}</b>。空闲 + 成功传输 + 碰撞 = 总时隙；
       任何一个时隙被漏记或重复记账，残差就会爆掉。</li>
-  <li><b>预热期</b> —— 前 20,000 个时隙不计入统计，消除链路建立瞬态。</li>
+  <li><b>预热期</b> —— 前 {warmup:,} 个时隙不计入统计，消除链路建立瞬态。</li>
 </ul>
 
 <h2 id="findings"><span class="n">7 ·</span> 三条从数据里读出来的结论</h2>
@@ -475,8 +476,18 @@ def main() -> None:
 
     jvl = m.get("jitter_vs_latency") or {}
 
+    # Model parameters are read from the run that produced the numbers; the
+    # fallbacks only matter when the page is rebuilt from an older summary.
+    setup = (sim.get("setup") or {})
     page = PAGE.format(
         repo=REPO_URL,
+        slot_bits=setup.get("slot_bits", 512),
+        slot_us=setup.get("slot_us", 51.2),
+        frame_slots=setup.get("frame_slots", 24),
+        jam_slots=setup.get("jam_slots", 1),
+        warmup=setup.get("warmup_slots", 20_000),
+        slots=setup.get("slots", 200_000),
+        repeats=setup.get("repeats", 8),
         probes=summary["probes_total"], targets=summary["targets"],
         gen=summary["generated_utc"], per_target=per_target,
         resid=float(sim.get("max_audit_residual", 0.0) or 0.0),
@@ -500,7 +511,6 @@ def main() -> None:
         fair_first=float(sweep["fairness"].iloc[0]),
         fair_min=float(sweep["fairness"].min()),
         fair_last=float(sweep["fairness"].iloc[-1]),
-        repeats=8,
         limits=limitation_rows(),
         qhead=quality_rows(quality).split("\n")[0].strip(),
         qbody="\n".join(quality_rows(quality).split("\n")[1:]),

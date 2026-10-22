@@ -124,7 +124,7 @@
   <div class="badges">
     <span class="badge">probes 360</span>
     <span class="badge">targets 6</span>
-    <span class="badge">generated 2026-10-11T06:42:32+00:00</span>
+    <span class="badge">generated 2026-10-22T02:14:03+00:00</span>
     <span class="badge">max audit residual 1.2e-04</span>
     <span class="badge">impl. agreement 0.0e+00</span>
   </div>
@@ -259,8 +259,9 @@
 
 <h2 id="collision"><span class="n">5 ·</span> 为什么不隔离碰撞域会崩</h2>
 <p>实测告诉我们网络“现在”如何表现；仿真告诉我们共享介质“为什么”会在主机变多时崩塌。
-模型跑的是标准 10 Mb/s 以太网时隙参数（1 时隙 = 512 bit = 51.2 μs，成帧后的数据帧占 24 时隙，
-冲突阻塞占 1 时隙），饱和负载，每个配置 8 个独立随机种子。</p>
+模型跑的是标准 10 Mb/s 以太网时隙参数（1 时隙 = 512 bit = 51.2 μs，
+成帧后的数据帧占 24 时隙，冲突阻塞占 1 时隙），饱和负载，
+每个配置 8 个独立随机种子 × 每次 200,000 个时隙。</p>
 <div class="scroll">
 <table>
   <thead><tr>
@@ -419,7 +420,7 @@ python scripts/build_site.py              # 从 data/ 重新生成本页面</cod
 <footer>
   仓库：<a href="https://github.com/heee-a/net-analysis-lab">github.com/heee-a/net-analysis-lab</a> ·
   MIT License · 作者 <a href="https://github.com/heee-a">@heee-a</a><br>
-  本页由 <code>scripts/build_site.py</code> 从 <code>data/</code> 生成于 2026-10-11T06:42:32+00:00 —— 页面里没有一个手写数字。
+  本页由 <code>scripts/build_site.py</code> 从 <code>data/</code> 生成于 2026-10-22T02:14:03+00:00 —— 页面里没有一个手写数字。
 </footer>
 
 </div>
